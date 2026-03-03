@@ -1,0 +1,2158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KutumbAI — Family Intelligence Assistant</title>
+    <meta name="description"
+        content="KutumbAI: India's first proactive household AI assistant for rural and low-income families.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hind:wght@300;400;500;600;700&family=Yatra+One&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        :root {
+            --clay: #8B4513;
+            --clay-dark: #6B3410;
+            --turmeric: #C49B2A;
+            --turmeric-light: #E8C547;
+            --sage: #5A7A4A;
+            --sage-light: #7A9C68;
+            --cream: #FAF3E3;
+            --parchment: #F0E6D0;
+            --brown-deep: #3A2010;
+            --brown-text: #4A3020;
+            --accent-teal: #2A7A6A;
+        }
+
+        body {
+            font-family: 'Hind', sans-serif;
+            color: var(--brown-text);
+            line-height: 1.65;
+            background: var(--cream);
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Agriculture background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background:
+                linear-gradient(180deg,
+                    rgba(250, 243, 227, 0.97) 0%,
+                    rgba(240, 230, 208, 0.92) 30%,
+                    rgba(200, 180, 140, 0.25) 60%,
+                    rgba(130, 170, 100, 0.18) 80%,
+                    rgba(90, 150, 70, 0.12) 100%),
+                linear-gradient(135deg,
+                    #F5E6C8 0%, #E8D5A8 25%, #D4C090 50%, #C4B07A 75%, #B8A468 100%);
+        }
+
+        /* Subtle farm pattern overlay */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5 C30 5 27 15 27 22 C27 26 28.3 28 30 28 C31.7 28 33 26 33 22 C33 15 30 5 30 5Z' fill='%238B6914' opacity='0.6'/%3E%3Cpath d='M15 35 L15 55 M45 35 L45 55' stroke='%235A7A4A' stroke-width='1' opacity='0.4'/%3E%3Ccircle cx='15' cy='33' r='3' fill='%235A7A4A' opacity='0.3'/%3E%3Ccircle cx='45' cy='33' r='3' fill='%235A7A4A' opacity='0.3'/%3E%3C/svg%3E");
+            background-size: 60px 60px;
+            pointer-events: none;
+        }
+
+        /* ===== SCROLL REVEAL ===== */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .reveal-delay-1 {
+            transition-delay: 0.1s;
+        }
+
+        .reveal-delay-2 {
+            transition-delay: 0.2s;
+        }
+
+        .reveal-delay-3 {
+            transition-delay: 0.3s;
+        }
+
+        /* ===== NAV ===== */
+        .topnav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            background: rgba(139, 69, 19, 0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 0 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 56px;
+            box-shadow: 0 2px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .topnav::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: repeating-linear-gradient(90deg, var(--turmeric) 0 8px, transparent 8px 14px, var(--sage) 14px 22px, transparent 22px 28px);
+            opacity: 0.5;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .nav-logo svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        .nav-logo span {
+            font-family: 'Yatra One', cursive;
+            font-size: 1.25rem;
+            color: #FFF;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 0;
+            height: 56px;
+        }
+
+        .nav-links a {
+            color: rgba(255, 255, 255, 0.65);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            padding: 0 18px;
+            display: flex;
+            align-items: center;
+            height: 100%;
+            position: relative;
+            transition: color 0.25s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #FFF;
+        }
+
+        .nav-links a.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 18px;
+            right: 18px;
+            height: 2.5px;
+            background: var(--turmeric);
+            border-radius: 2px 2px 0 0;
+        }
+
+        .nav-user {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--turmeric), var(--turmeric-light));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--brown-deep);
+        }
+
+        /* ===== SECTIONS ===== */
+        section {
+            padding: 80px 32px 40px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-family: 'Yatra One', cursive;
+            font-size: 1.8rem;
+            color: var(--clay);
+            margin-bottom: 6px;
+        }
+
+        .section-subtitle {
+            font-size: 0.95rem;
+            color: #7A6A5A;
+            margin-bottom: 32px;
+            max-width: 600px;
+        }
+
+        .divider {
+            width: 100%;
+            height: 1px;
+            background: repeating-linear-gradient(90deg, var(--turmeric) 0 6px, transparent 6px 14px);
+            opacity: 0.25;
+            margin: 0;
+        }
+
+        /* ===== CARDS ===== */
+        .card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(196, 155, 42, 0.12);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s ease;
+            perspective: 800px;
+        }
+
+        .card:hover {
+            transform: translateY(-4px) rotateX(1deg) rotateY(-1deg);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(139, 69, 19, 0.08);
+        }
+
+        .card-title {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--brown-deep);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ===== ONBOARDING ===== */
+        #onboarding {
+            padding-top: 100px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .onboard-container {
+            max-width: 620px;
+            width: 100%;
+            animation: floatIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes floatIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.97);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .onboard-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .onboard-header .logo-big {
+            font-family: 'Yatra One', cursive;
+            font-size: 2.5rem;
+            color: var(--clay);
+            margin-bottom: 6px;
+        }
+
+        .onboard-header p {
+            color: #7A6A5A;
+            font-size: 0.95rem;
+            max-width: 420px;
+            margin: 0 auto;
+        }
+
+        .onboard-card {
+            background: #FFF;
+            border-radius: 20px;
+            padding: 36px;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(196, 155, 42, 0.1);
+        }
+
+        .onboard-card h3 {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--clay-dark);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .form-group.full {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #6A5A4A;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 10px 14px;
+            border: 1.5px solid #E0D6C4;
+            border-radius: 10px;
+            font-family: 'Hind', sans-serif;
+            font-size: 0.9rem;
+            color: var(--brown-text);
+            background: #FAFAFA;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: var(--turmeric);
+            background: #FFF;
+        }
+
+        .form-group input::placeholder {
+            color: #B5A595;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 32px;
+            background: linear-gradient(135deg, var(--clay), var(--clay-dark));
+            color: #FFF;
+            border: none;
+            border-radius: 50px;
+            font-family: 'Hind', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s;
+            box-shadow: 0 4px 16px rgba(139, 69, 19, 0.3);
+            margin-top: 8px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(139, 69, 19, 0.4);
+        }
+
+        /* ===== DASHBOARD SECTION ===== */
+        .dash-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* Suggestion */
+        .suggestion-card {
+            border-left: 4px solid var(--turmeric);
+        }
+
+        .suggestion-body {
+            font-size: 0.9rem;
+            color: #5A4A3A;
+        }
+
+        /* Spend goal */
+        .goal-display {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+            margin-bottom: 4px;
+        }
+
+        .goal-saved {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--sage);
+        }
+
+        .goal-target {
+            font-size: 0.9rem;
+            color: #8A7A6A;
+        }
+
+        .goal-edit-btn {
+            background: none;
+            border: none;
+            color: var(--turmeric);
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: underline;
+            margin-left: auto;
+        }
+
+        .goal-bar-bg {
+            background: #EDE3CC;
+            border-radius: 6px;
+            height: 8px;
+            overflow: hidden;
+            margin: 10px 0 12px;
+        }
+
+        .goal-bar-fill {
+            height: 100%;
+            border-radius: 6px;
+            background: linear-gradient(90deg, var(--sage), var(--turmeric));
+            transition: width 1s ease;
+        }
+
+        .goal-warning {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.82rem;
+            color: var(--clay);
+            background: rgba(139, 69, 19, 0.06);
+            padding: 8px 12px;
+            border-radius: 8px;
+        }
+
+        /* goal edit modal inline */
+        .goal-edit-area {
+            margin-top: 12px;
+            display: none;
+        }
+
+        .goal-edit-area.show {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .goal-edit-area input {
+            width: 100px;
+            padding: 6px 10px;
+            border: 1.5px solid #E0D6C4;
+            border-radius: 8px;
+            font-family: 'Hind', sans-serif;
+            font-size: 0.88rem;
+            outline: none;
+        }
+
+        .goal-edit-area input:focus {
+            border-color: var(--turmeric);
+        }
+
+        .btn-small {
+            padding: 6px 14px;
+            background: var(--sage);
+            color: #FFF;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-family: 'Hind', sans-serif;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* ===== FINANCE SECTION ===== */
+        .loan-compare {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .loan-option {
+            text-align: center;
+            padding: 16px 10px;
+            border-radius: 12px;
+            background: var(--cream);
+            border: 1px solid rgba(196, 155, 42, 0.15);
+            cursor: pointer;
+            transition: all 0.25s;
+        }
+
+        .loan-option:hover {
+            border-color: var(--turmeric);
+            box-shadow: 0 2px 12px rgba(196, 155, 42, 0.15);
+        }
+
+        .loan-option-name {
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: var(--brown-deep);
+            margin-bottom: 2px;
+        }
+
+        .loan-option-detail {
+            font-size: 0.78rem;
+            color: #8A7A6A;
+            margin-bottom: 8px;
+        }
+
+        .mini-chart {
+            height: 28px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 3px;
+        }
+
+        .mini-chart .bar {
+            width: 6px;
+            border-radius: 2px 2px 0 0;
+        }
+
+        /* ===== HEALTH ===== */
+        .timeline {
+            position: relative;
+            padding-left: 28px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 9px;
+            top: 2px;
+            bottom: 2px;
+            width: 2px;
+            background: linear-gradient(180deg, var(--sage), #D4D0C8);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .timeline-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: -28px;
+            top: 3px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--sage);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #FFF;
+            font-size: 0.6rem;
+            box-shadow: 0 2px 6px rgba(90, 122, 74, 0.3);
+        }
+
+        .timeline-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .timeline-avatar.baby {
+            background: #FCE4EC;
+        }
+
+        .timeline-avatar.elder {
+            background: #E8EAF6;
+        }
+
+        .timeline-title {
+            font-weight: 700;
+            font-size: 0.88rem;
+        }
+
+        .timeline-date {
+            font-size: 0.76rem;
+            color: #9A8A7A;
+        }
+
+        .timeline-item.faded {
+            opacity: 0.3;
+        }
+
+        .symptom-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 12px 18px;
+            background: linear-gradient(135deg, var(--accent-teal), #21867A);
+            color: #FFF;
+            border: none;
+            border-radius: 50px;
+            font-family: 'Hind', sans-serif;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 16px;
+            transition: all 0.25s;
+            box-shadow: 0 4px 16px rgba(42, 122, 106, 0.25);
+        }
+
+        .symptom-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(42, 122, 106, 0.35);
+        }
+
+        /* ===== SKILLS & OPPORTUNITIES ===== */
+        .skills-input-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .skill-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, rgba(90, 122, 74, 0.1), rgba(196, 155, 42, 0.08));
+            border: 1px solid rgba(90, 122, 74, 0.2);
+            border-radius: 20px;
+            padding: 5px 12px;
+            font-size: 0.82rem;
+            color: var(--sage);
+            font-weight: 500;
+        }
+
+        .skill-tag .remove {
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: #AAA;
+            transition: color 0.2s;
+        }
+
+        .skill-tag .remove:hover {
+            color: #C1440E;
+        }
+
+        .skill-add-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .skill-input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1.5px solid #E0D6C4;
+            border-radius: 24px;
+            font-family: 'Hind', sans-serif;
+            font-size: 0.88rem;
+            outline: none;
+            background: #FFF;
+            color: var(--brown-text);
+        }
+
+        .skill-input:focus {
+            border-color: var(--sage);
+        }
+
+        .skill-input::placeholder {
+            color: #B5A595;
+        }
+
+        .btn-add-skill {
+            padding: 10px 20px;
+            background: var(--sage);
+            color: #FFF;
+            border: none;
+            border-radius: 24px;
+            font-family: 'Hind', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-add-skill:hover {
+            background: var(--sage-light);
+        }
+
+        .btn-suggest {
+            margin-top: 12px;
+            padding: 12px 28px;
+            background: linear-gradient(135deg, var(--turmeric), #B08620);
+            color: #FFF;
+            border: none;
+            border-radius: 50px;
+            font-family: 'Hind', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s;
+            box-shadow: 0 4px 16px rgba(196, 155, 42, 0.3);
+        }
+
+        .btn-suggest:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(196, 155, 42, 0.4);
+        }
+
+        .suggestions-area {
+            margin-top: 20px;
+        }
+
+        .suggestion-item {
+            padding: 14px 16px;
+            background: var(--cream);
+            border-radius: 12px;
+            margin-bottom: 10px;
+            border-left: 3px solid var(--sage);
+            font-size: 0.9rem;
+            color: var(--brown-text);
+            line-height: 1.6;
+            animation: fadeUp 0.3s ease;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            background: var(--brown-deep);
+            padding: 24px 32px;
+            text-align: center;
+            position: relative;
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: repeating-linear-gradient(90deg, var(--turmeric) 0 6px, transparent 6px 12px, var(--sage) 12px 18px, transparent 18px 24px);
+            opacity: 0.35;
+        }
+
+        .footer-line1 {
+            font-family: 'Yatra One', cursive;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+            margin-bottom: 4px;
+        }
+
+        .footer-line2 {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.78rem;
+        }
+
+        /* ===== USER SWITCH ===== */
+        .nav-user {
+            position: relative;
+        }
+
+        .switch-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.72rem;
+            font-family: 'Hind', sans-serif;
+            padding: 3px 10px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-left: 6px;
+        }
+
+        .switch-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            color: #FFF;
+        }
+
+        /* ===== ACTION CARD ===== */
+        .action-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-top: 14px;
+        }
+
+        .action-card {
+            padding: 16px;
+            border-radius: 14px;
+            background: var(--cream);
+            border: 1px solid rgba(196, 155, 42, 0.12);
+            cursor: pointer;
+            transition: all 0.25s;
+        }
+
+        .action-card:hover {
+            border-color: var(--turmeric);
+            box-shadow: 0 6px 24px rgba(196, 155, 42, 0.2);
+            transform: translateY(-4px) scale(1.02);
+        }
+
+        .action-card-icon {
+            font-size: 1.3rem;
+            margin-bottom: 6px;
+        }
+
+        .action-card-title {
+            font-weight: 700;
+            font-size: 0.88rem;
+            margin-bottom: 3px;
+        }
+
+        .action-card-desc {
+            font-size: 0.78rem;
+            color: #8A7A6A;
+            line-height: 1.4;
+        }
+
+        /* ===== OCCUPATION SECTION ===== */
+        .occ-input-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .occ-input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1.5px solid #E0D6C4;
+            border-radius: 12px;
+            font-family: 'Hind', sans-serif;
+            font-size: 0.88rem;
+            outline: none;
+            background: #FFF;
+            color: var(--brown-text);
+        }
+
+        .occ-input:focus {
+            border-color: var(--sage);
+        }
+
+        .occ-btn {
+            padding: 10px 20px;
+            background: var(--sage);
+            color: #FFF;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Hind', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .occ-btn:hover {
+            background: var(--sage-light);
+        }
+
+        .occ-result {
+            margin-top: 14px;
+        }
+
+        .chat-fab {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 5000;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--clay), var(--clay-dark));
+            border: 3px solid rgba(255, 255, 255, 0.25);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 6px 28px rgba(139, 69, 19, 0.5);
+            transition: all 0.3s;
+            color: #FFF;
+            animation: fabBounce 2s ease-in-out infinite, fabPulseRing 3s ease-in-out infinite;
+        }
+
+        @keyframes fabBounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            15% {
+                transform: translateY(-12px);
+            }
+
+            25% {
+                transform: translateY(0);
+            }
+
+            35% {
+                transform: translateY(-6px);
+            }
+
+            45% {
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fabPulseRing {
+
+            0%,
+            100% {
+                box-shadow: 0 6px 28px rgba(139, 69, 19, 0.5);
+            }
+
+            50% {
+                box-shadow: 0 6px 28px rgba(139, 69, 19, 0.5), 0 0 0 10px rgba(196, 155, 42, 0.15), 0 0 0 20px rgba(196, 155, 42, 0.05);
+            }
+        }
+
+        .chat-fab:hover {
+            transform: scale(1.12) translateY(-2px);
+            animation: none;
+            box-shadow: 0 10px 40px rgba(139, 69, 19, 0.6), 0 0 0 6px rgba(196, 155, 42, 0.2);
+        }
+
+        .chat-fab .tooltip {
+            position: absolute;
+            right: 66px;
+            background: var(--brown-deep);
+            color: #FFF;
+            font-size: 0.76rem;
+            font-family: 'Hind', sans-serif;
+            padding: 5px 11px;
+            border-radius: 8px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+
+        .chat-fab:hover .tooltip {
+            opacity: 1;
+        }
+
+        /* ===== CHAT DRAWER ===== */
+        .chat-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 6000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.35s;
+        }
+
+        .chat-overlay.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .chat-drawer {
+            position: fixed;
+            top: 0;
+            right: -420px;
+            width: 400px;
+            height: 100%;
+            background: var(--cream);
+            z-index: 7000;
+            display: flex;
+            flex-direction: column;
+            box-shadow: -8px 0 40px rgba(0, 0, 0, 0.2);
+            transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .chat-drawer.open {
+            right: 0;
+        }
+
+        .chat-drawer-header {
+            background: linear-gradient(135deg, var(--clay), var(--clay-dark));
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: #FFF;
+            flex-shrink: 0;
+        }
+
+        .chat-drawer-header h3 {
+            font-family: 'Yatra One', cursive;
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+
+        .chat-close {
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            color: #FFF;
+            font-size: 1.1rem;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .chat-close:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .chat-lang {
+            background: var(--sage);
+            color: rgba(255, 255, 255, 0.85);
+            padding: 8px 18px;
+            font-size: 0.74rem;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .chat-msg {
+            max-width: 85%;
+            padding: 11px 15px;
+            border-radius: 14px;
+            font-size: 0.86rem;
+            line-height: 1.6;
+            animation: msgIn 0.3s ease;
+            white-space: pre-wrap;
+        }
+
+        @keyframes msgIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chat-msg.user {
+            background: linear-gradient(135deg, var(--clay), var(--clay-dark));
+            color: #FFF;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-msg.bot {
+            background: #FFF;
+            color: var(--brown-text);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+            border: 1px solid rgba(196, 155, 42, 0.12);
+        }
+
+        .typing-indicator {
+            align-self: flex-start;
+            padding: 12px 18px;
+            background: #FFF;
+            border-radius: 14px;
+            border-bottom-left-radius: 4px;
+            border: 1px solid rgba(196, 155, 42, 0.12);
+            display: none;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dots span {
+            width: 6px;
+            height: 6px;
+            background: var(--turmeric);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite;
+        }
+
+        .typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            60%,
+            100% {
+                transform: translateY(0);
+            }
+
+            30% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .chat-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            padding: 0 14px 8px;
+            flex-shrink: 0;
+        }
+
+        .chat-chip {
+            background: #FFF;
+            border: 1px solid rgba(139, 69, 19, 0.2);
+            border-radius: 14px;
+            padding: 5px 11px;
+            font-size: 0.73rem;
+            color: var(--clay);
+            cursor: pointer;
+            font-family: 'Hind', sans-serif;
+            transition: all 0.2s;
+        }
+
+        .chat-chip:hover {
+            background: var(--clay);
+            color: #FFF;
+            border-color: var(--clay);
+        }
+
+        .chat-input-bar {
+            display: flex;
+            gap: 8px;
+            padding: 12px 14px;
+            border-top: 1px solid rgba(196, 155, 42, 0.12);
+            background: rgba(250, 243, 227, 0.95);
+            flex-shrink: 0;
+        }
+
+        .chat-input {
+            flex: 1;
+            border: 1.5px solid rgba(196, 155, 42, 0.18);
+            border-radius: 22px;
+            padding: 9px 15px;
+            font-size: 0.86rem;
+            font-family: 'Hind', sans-serif;
+            outline: none;
+            background: #FFF;
+            color: var(--brown-text);
+            transition: border-color 0.2s;
+        }
+
+        .chat-input:focus {
+            border-color: var(--clay);
+        }
+
+        .chat-input::placeholder {
+            color: #B5A595;
+        }
+
+        .chat-send {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, var(--clay), var(--clay-dark));
+            color: #FFF;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+
+        .chat-send:hover {
+            transform: scale(1.05);
+        }
+
+        /* ===== HIDDEN STATE ===== */
+        .hidden {
+            display: none !important;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 900px) {
+
+            .dash-grid,
+            .loan-compare {
+                grid-template-columns: 1fr;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            section {
+                padding: 80px 18px 30px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .topnav {
+                padding: 0 16px;
+            }
+
+            .nav-user span {
+                display: none;
+            }
+
+            .chat-drawer {
+                width: 100%;
+                right: -100%;
+            }
+
+            .onboard-card {
+                padding: 24px 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ===== NAV ===== -->
+    <nav class="topnav">
+        <a href="#" class="nav-logo" onclick="event.preventDefault()">
+            <svg viewBox="0 0 48 48" fill="none">
+                <path d="M24 10C24 10 20 20 20 25C20 28 21.8 30 24 30C26.2 30 28 28 28 25C28 20 24 10 24 10Z"
+                    fill="#F0C860" />
+                <path d="M24 14C24 14 22 22 22 25C22 27 22.9 28.5 24 28.5C25.1 28.5 26 27 26 25C26 22 24 14 24 14Z"
+                    fill="#FFF3E0" />
+                <ellipse cx="24" cy="34" rx="8" ry="3" fill="rgba(255,255,255,0.4)" />
+            </svg>
+            <span>KutumbAI</span>
+        </a>
+        <div class="nav-links" id="navLinks">
+            <a href="#dashboard" class="active" data-section="dashboard">Dashboard</a>
+            <a href="#finance" data-section="finance">Finance</a>
+            <a href="#health" data-section="health">Health</a>
+            <a href="#skills" data-section="skills">Skills</a>
+        </div>
+        <div class="nav-user">
+            <div class="nav-avatar" id="navAvatar">?</div>
+            <span id="navFamilyName">Setup Family</span>
+            <button class="switch-btn" id="switchBtn" onclick="switchUser()" style="display:none">Switch</button>
+        </div>
+    </nav>
+
+    <!-- ===== ONBOARDING ===== -->
+    <section id="onboarding">
+        <div class="onboard-container">
+            <div class="onboard-header">
+                <div class="logo-big">&#x1FA94; KutumbAI</div>
+                <p>Every family deserves guidance, not just information. Tell us about your family so we can help you
+                    better.</p>
+            </div>
+            <div class="onboard-card">
+                <h3>&#x1F3E1; Tell Us About Your Family</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Family Name *</label>
+                        <input type="text" id="inpFamilyName" placeholder="Enter your family name">
+                    </div>
+                    <div class="form-group">
+                        <label>Number of Family Members</label>
+                        <input type="number" id="inpMembers" placeholder="e.g. 5" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label>Village / Town / City</label>
+                        <input type="text" id="inpLocation" placeholder="e.g. Indore, MP">
+                    </div>
+                    <div class="form-group">
+                        <label>Primary Occupation / Job</label>
+                        <select id="inpOccupation">
+                            <option value="">Select...</option>
+                            <option value="Farming">Farming</option>
+                            <option value="Daily Wage Labour">Daily Wage Labour</option>
+                            <option value="Small Business">Small Business / Shop</option>
+                            <option value="Tailoring/Handicraft">Tailoring / Handicraft</option>
+                            <option value="Animal Husbandry">Animal Husbandry</option>
+                            <option value="Government Job">Government Job</option>
+                            <option value="Private Job">Private Job</option>
+                            <option value="Unemployed">Unemployed / Looking for work</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Monthly Income (&#x20B9;)</label>
+                        <input type="number" id="inpIncome" placeholder="e.g. 8000">
+                    </div>
+                    <div class="form-group">
+                        <label>Monthly Expenditure (&#x20B9;)</label>
+                        <input type="number" id="inpExpenditure" placeholder="e.g. 6000">
+                    </div>
+                    <div class="form-group">
+                        <label>Number of Children</label>
+                        <input type="number" id="inpChildren" placeholder="e.g. 2" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Children's Ages</label>
+                        <input type="text" id="inpChildrenAges" placeholder="e.g. 6, 12">
+                    </div>
+                    <div class="form-group">
+                        <label>Existing Loan Amount (&#x20B9;)</label>
+                        <input type="number" id="inpLoanAmount" placeholder="e.g. 50000 (0 if none)">
+                    </div>
+                    <div class="form-group">
+                        <label>Loan Source</label>
+                        <select id="inpLoanSource">
+                            <option value="None">No Loan</option>
+                            <option value="Bank">Bank</option>
+                            <option value="Moneylender">Local Moneylender</option>
+                            <option value="SHG">Self Help Group (SHG)</option>
+                            <option value="Microfinance">Microfinance</option>
+                            <option value="Relatives">Relatives / Friends</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group full" style="margin-top:8px">
+                        <button class="btn-primary" onclick="saveFamily()">
+                            Enter KutumbAI &#x2192;
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== DASHBOARD ===== -->
+    <section id="dashboard" class="hidden">
+        <div class="section-title">&#x1F3E0; Dashboard</div>
+        <div class="section-subtitle" id="dashGreeting">Welcome! Here's your family overview.</div>
+        <div class="dash-grid">
+            <!-- Today's Suggestion -->
+            <div class="card suggestion-card">
+                <div class="card-title">&#x1F4A1; Today's Suggestion</div>
+                <p class="suggestion-body" id="suggestionText">Loading your personalized suggestion...</p>
+            </div>
+            <!-- Spend Goal -->
+            <div class="card">
+                <div class="card-title" style="justify-content:space-between">
+                    <span>&#x1F4B0; Monthly Spend Goal</span>
+                    <button class="goal-edit-btn" onclick="toggleGoalEdit()">Edit</button>
+                </div>
+                <div class="goal-display">
+                    <span class="goal-saved" id="goalSaved">₹0</span>
+                    <span class="goal-target" id="goalTarget">/ ₹2,000</span>
+                </div>
+                <div class="goal-bar-bg">
+                    <div class="goal-bar-fill" id="goalBar" style="width:0%"></div>
+                </div>
+                <div class="goal-warning" id="goalWarning">
+                    <span>&#x26A0;&#xFE0F;</span>
+                    <span>Set your monthly saving target to track progress.</span>
+                </div>
+                <div class="goal-edit-area" id="goalEditArea">
+                    <input type="number" id="goalSavedInput" placeholder="Saved ₹">
+                    <input type="number" id="goalTargetInput" placeholder="Target ₹">
+                    <button class="btn-small" onclick="updateGoal()">Save</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="divider hidden" id="divider1"></div>
+
+    <!-- ===== FINANCE ===== -->
+    <section id="finance" class="hidden">
+        <div class="section-title">&#x1F4B3; Financial Center</div>
+        <div class="section-subtitle">Loans, job switching, and income advice personalized to your family.</div>
+        <div class="card">
+            <div class="card-title">&#x2696;&#xFE0F; Loan Decision Support</div>
+            <p style="font-size:0.82rem;color:#8A7A6A;margin-bottom:14px">Click to discuss with KutumbAI</p>
+            <div class="loan-compare">
+                <div class="loan-option"
+                    onclick="openChatWith('I want to understand the risks of borrowing from a traditional moneylender. What should I watch out for?')">
+                    <div class="loan-option-name">Traditional Lender</div>
+                    <div class="loan-option-detail">Higher interest rates</div>
+                    <div class="mini-chart">
+                        <div class="bar" style="height:20px;background:#C1440E;"></div>
+                        <div class="bar" style="height:16px;background:#D4551A;"></div>
+                        <div class="bar" style="height:12px;background:#E07B39;"></div>
+                        <div class="bar" style="height:8px;background:#E8966A;"></div>
+                    </div>
+                </div>
+                <div class="loan-option"
+                    onclick="openChatWith('I want to know about getting a bank loan. What are the requirements and what is the process?')">
+                    <div class="loan-option-name">Bank Loan</div>
+                    <div class="loan-option-detail">Lower cost, more paperwork</div>
+                    <div class="mini-chart">
+                        <div class="bar" style="height:6px;background:var(--sage);"></div>
+                        <div class="bar" style="height:12px;background:#7AA844;"></div>
+                        <div class="bar" style="height:18px;background:#8BC34A;"></div>
+                        <div class="bar" style="height:24px;background:#AED581;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="action-cards">
+            <div class="action-card"
+                onclick="openChatWith('I am currently working as ' + (familyData?.occupation||'my current job') + '. I want to switch to a better job. What options do I have and how should I prepare?')">
+                <div class="action-card-icon">&#x1F504;</div>
+                <div class="action-card-title">Job Switch Advisor</div>
+                <div class="action-card-desc">Thinking of changing jobs? Get AI advice on switching careers.</div>
+            </div>
+            <div class="action-card" id="incomeBoostCard"
+                onclick="openChatWith('My monthly income is ₹' + (familyData?.income||'unknown') + ' but expenses are ₹' + (familyData?.expenditure||'unknown') + '. Suggest ways I can earn extra money or reduce costs.')">
+                <div class="action-card-icon">&#x1F4B5;</div>
+                <div class="action-card-title">Income Boost Ideas</div>
+                <div class="action-card-desc">Get suggestions to increase earnings or reduce expenses.</div>
+            </div>
+        </div>
+    </section>
+
+    <div class="divider hidden" id="divider2"></div>
+
+    <!-- ===== HEALTH ===== -->
+    <section id="health" class="hidden">
+        <div class="section-title">&#x1F3E5; Health & Family Planning</div>
+        <div class="section-subtitle">Health guidance, children planning, and education fees management.</div>
+        <div class="dash-grid">
+            <div class="card">
+                <div class="card-title">&#x1F514; Family Reminders</div>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-dot">&#x2713;</div>
+                        <div class="timeline-avatar baby">&#x1F476;</div>
+                        <div>
+                            <div class="timeline-title">Vaccination Reminder</div>
+                            <div class="timeline-date">&#x1F4C5; Due this month</div>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot">&#x2713;</div>
+                        <div class="timeline-avatar elder">&#x1F9D3;</div>
+                        <div>
+                            <div class="timeline-title">Medicine Reminder</div>
+                            <div class="timeline-date">&#x1F4C5; Daily - 8:00 AM</div>
+                        </div>
+                    </div>
+                </div>
+                <button class="symptom-btn"
+                    onclick="openChatWith('My family member is feeling unwell. Can you help me check symptoms and suggest what to do?')">
+                    &#x1F321;&#xFE0F; Check Symptoms with AI
+                </button>
+            </div>
+            <div class="card">
+                <div class="card-title">&#x1F476; Children & Family Planning</div>
+                <div class="action-cards" style="margin-top:8px">
+                    <div class="action-card"
+                        onclick="openChatWith('I have ' + (familyData?.children||'0') + ' children (ages: ' + (familyData?.childrenAges||'N/A') + '). My income is ₹' + (familyData?.income||'unknown') + '/month and expenses are ₹' + (familyData?.expenditure||'unknown') + '/month. Is it financially wise to have another child? Consider healthcare, education, and daily costs.')">
+                        <div class="action-card-icon">&#x1F914;</div>
+                        <div class="action-card-title">Should We Plan Another Child?</div>
+                        <div class="action-card-desc">AI analysis based on your income, expenses, and current family
+                            size.</div>
+                    </div>
+                    <div class="action-card"
+                        onclick="openChatWith('I have ' + (familyData?.children||'0') + ' children (ages: ' + (familyData?.childrenAges||'N/A') + '). What are the expected school fees, tuition costs, and education expenses I should budget for? Suggest government scholarship schemes too.')">
+                        <div class="action-card-icon">&#x1F393;</div>
+                        <div class="action-card-title">Education Fees & Planning</div>
+                        <div class="action-card-desc">Estimate school costs and find scholarships for your children.
+                        </div>
+                    </div>
+                    <div class="action-card"
+                        onclick="openChatWith('With my income of ₹' + (familyData?.income||'unknown') + '/month and ' + (familyData?.children||'0') + ' children, how should I manage money for their upbringing, health, and education?')">
+                        <div class="action-card-icon">&#x1F4CA;</div>
+                        <div class="action-card-title">Money Management for Kids</div>
+                        <div class="action-card-desc">Budget planning for children's upbringing and needs.</div>
+                    </div>
+                    <div class="action-card"
+                        onclick="openChatWith('What government healthcare schemes are available for pregnant women and newborns in rural India? Tell me about Janani Suraksha Yojana and PMMVY.')">
+                        <div class="action-card-icon">&#x1F3E5;</div>
+                        <div class="action-card-title">Maternity & Newborn Schemes</div>
+                        <div class="action-card-desc">Government benefits for pregnancy and childcare.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="divider hidden" id="divider3"></div>
+
+    <!-- ===== OCCUPATION SPECIFIC ===== -->
+    <section id="occupation" class="hidden">
+        <div class="section-title" id="occTitle">&#x1F33E; Your Work</div>
+        <div class="section-subtitle" id="occSubtitle">Get personalized advice for your occupation.</div>
+        <div class="card" id="occCard">
+            <div class="card-title" id="occCardTitle">&#x1F33E; Occupation Tools</div>
+            <div id="occDynamic"></div>
+        </div>
+    </section>
+
+    <div class="divider hidden" id="divider4"></div>
+
+    <!-- ===== SKILLS & OPPORTUNITIES ===== -->
+    <section id="skills" class="hidden">
+        <div class="section-title">&#x1F331; Skills & Opportunities</div>
+        <div class="section-subtitle">Add your skills and let KutumbAI suggest earning opportunities for you.</div>
+        <div class="card">
+            <div class="card-title">&#x1F4DD; Your Skills</div>
+            <div class="skills-input-area" id="skillTags"></div>
+            <div class="skill-add-row">
+                <input type="text" class="skill-input" id="skillInput"
+                    placeholder="Type a skill (e.g. tailoring, cooking, farming...)"
+                    onkeydown="if(event.key==='Enter')addSkill()">
+                <button class="btn-add-skill" onclick="addSkill()">+ Add</button>
+            </div>
+            <button class="btn-suggest" onclick="suggestOpportunities()" id="suggestBtn">&#x2728; Get AI
+                Suggestions</button>
+            <div class="suggestions-area" id="suggestionsArea"></div>
+        </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer hidden" id="mainFooter">
+        <div class="footer-line1">&#x1FA94; KutumbAI</div>
+        <div class="footer-line2">India's Personal Family Intelligence Assistant</div>
+    </footer>
+
+    <!-- ===== CHAT FAB ===== -->
+    <button class="chat-fab" onclick="toggleChat()" aria-label="Open KutumbAI Chat">
+        &#x1FA94;
+        <span class="tooltip">Ask KutumbAI</span>
+    </button>
+
+    <!-- ===== CHAT OVERLAY/DRAWER ===== -->
+    <div class="chat-overlay" id="chatOverlay" onclick="toggleChat()"></div>
+    <div class="chat-drawer" id="chatDrawer">
+        <div class="chat-drawer-header">
+            <h3>&#x1FA94; KutumbAI</h3>
+            <button class="chat-close" onclick="toggleChat()">&#x2715;</button>
+        </div>
+        <div class="chat-lang">
+            Type in Hindi, English, Tamil, Marathi, Bengali, Telugu or any Indian language — replies come in the same
+            language.
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <div class="chat-msg bot">Namaste! I am KutumbAI, your family's trusted advisor. Ask me anything — savings,
+                loans, government schemes, health, or education. &#x1F64F;</div>
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="typing-dots"><span></span><span></span><span></span></div>
+            </div>
+        </div>
+        <div class="chat-chips">
+            <span class="chat-chip" onclick="sendChip(this)">Government schemes?</span>
+            <span class="chat-chip" onclick="sendChip(this)">How to save money?</span>
+            <span class="chat-chip" onclick="sendChip(this)">School admission help</span>
+            <span class="chat-chip" onclick="sendChip(this)">Health advice</span>
+        </div>
+        <div class="chat-input-bar">
+            <input type="text" class="chat-input" id="chatInput" placeholder="Ask KutumbAI..."
+                onkeydown="if(event.key==='Enter')sendMessage()">
+            <button class="chat-send" onclick="sendMessage()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- ===== JS ===== -->
+    <script>
+        // ===== STATE =====
+        let familyData = JSON.parse(localStorage.getItem('kutumbai_family') || 'null');
+        let goalData = JSON.parse(localStorage.getItem('kutumbai_goal') || '{"saved":0,"target":2000}');
+        let skillsList = JSON.parse(localStorage.getItem('kutumbai_skills') || '[]');
+        let chatOpen = false;
+
+        // ===== INIT =====
+        window.addEventListener('load', () => {
+            if (familyData) {
+                showDashboard();
+            }
+        });
+
+        // ===== FAMILY ONBOARDING =====
+        function saveFamily() {
+            const name = document.getElementById('inpFamilyName').value.trim();
+            const members = document.getElementById('inpMembers').value;
+            const location = document.getElementById('inpLocation').value.trim();
+            const income = document.getElementById('inpIncome').value;
+            const expenditure = document.getElementById('inpExpenditure').value;
+            const occupation = document.getElementById('inpOccupation').value;
+            const children = document.getElementById('inpChildren').value;
+            const childrenAges = document.getElementById('inpChildrenAges').value.trim();
+            const loanAmount = document.getElementById('inpLoanAmount').value;
+            const loanSource = document.getElementById('inpLoanSource').value;
+
+            if (!name) { alert('Please enter your family name.'); return; }
+
+            familyData = { name, members, location, income, expenditure, occupation, children, childrenAges, loanAmount, loanSource };
+            localStorage.setItem('kutumbai_family', JSON.stringify(familyData));
+
+            // Auto-set spend goal based on income and expenditure
+            if (income && expenditure) {
+                const saveable = Math.max(0, parseInt(income) - parseInt(expenditure));
+                goalData = { saved: 0, target: saveable > 0 ? saveable : 2000 };
+                localStorage.setItem('kutumbai_goal', JSON.stringify(goalData));
+            }
+
+            showDashboard();
+        }
+
+        function showDashboard() {
+            document.getElementById('onboarding').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            document.getElementById('divider1').classList.remove('hidden');
+            document.getElementById('finance').classList.remove('hidden');
+            document.getElementById('divider2').classList.remove('hidden');
+            document.getElementById('health').classList.remove('hidden');
+            document.getElementById('divider3').classList.remove('hidden');
+            document.getElementById('occupation').classList.remove('hidden');
+            document.getElementById('divider4').classList.remove('hidden');
+            document.getElementById('skills').classList.remove('hidden');
+            document.getElementById('mainFooter').classList.remove('hidden');
+            document.getElementById('switchBtn').style.display = 'inline-block';
+
+            // Update nav
+            const initials = familyData.name.substring(0, 2).toUpperCase();
+            document.getElementById('navAvatar').textContent = initials;
+            document.getElementById('navFamilyName').textContent = familyData.name + ' Family';
+
+            // Update greeting
+            document.getElementById('dashGreeting').textContent =
+                `Welcome, ${familyData.name} Family! Here's your personalized overview.`;
+
+            // Generate suggestion based on family info
+            generateSuggestion();
+
+            // Restore goal
+            updateGoalDisplay();
+
+            // Restore skills
+            renderSkills();
+
+            // Build occupation section
+            buildOccupationSection();
+
+            // Activate nav
+            updateActiveNav();
+        }
+
+        // ===== SWITCH USER =====
+        function switchUser() {
+            localStorage.removeItem('kutumbai_family');
+            localStorage.removeItem('kutumbai_goal');
+            localStorage.removeItem('kutumbai_skills');
+            familyData = null;
+            goalData = { saved: 0, target: 2000 };
+            skillsList = [];
+            // Hide all sections
+            ['dashboard', 'divider1', 'finance', 'divider2', 'health', 'divider3', 'occupation', 'divider4', 'skills', 'mainFooter'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById('onboarding').classList.remove('hidden');
+            document.getElementById('switchBtn').style.display = 'none';
+            document.getElementById('navAvatar').textContent = '?';
+            document.getElementById('navFamilyName').textContent = 'Setup Family';
+            // Clear form
+            document.querySelectorAll('#onboarding input').forEach(i => i.value = '');
+            document.querySelectorAll('#onboarding select').forEach(s => s.selectedIndex = 0);
+            window.scrollTo(0, 0);
+        }
+
+        // ===== OCCUPATION-SPECIFIC SECTION =====
+        function buildOccupationSection() {
+            const occ = familyData.occupation || '';
+            const container = document.getElementById('occDynamic');
+            const title = document.getElementById('occTitle');
+            const subtitle = document.getElementById('occSubtitle');
+            const cardTitle = document.getElementById('occCardTitle');
+
+            const configs = {
+                'Farming': {
+                    icon: '&#x1F33E;', title: 'Agriculture Tools',
+                    sub: 'Get crop-specific advice to improve your yield and income.',
+                    cardT: '&#x1F33E; Crop Advisor',
+                    label: 'What crop are you growing?',
+                    placeholder: 'e.g. Wheat, Rice, Cotton, Sugarcane...',
+                    prompt: (v) => `I am a farmer growing ${v}. Give me practical tips for better yield, pest control, best selling time, and any government subsidies for this crop.`
+                },
+                'Animal Husbandry': {
+                    icon: '&#x1F404;', title: 'Livestock Tools',
+                    sub: 'Get advice on livestock care, milk production, and market prices.',
+                    cardT: '&#x1F404; Livestock Advisor',
+                    label: 'What livestock do you have?',
+                    placeholder: 'e.g. Cows, Buffaloes, Goats, Poultry...',
+                    prompt: (v) => `I have ${v}. Give me advice on feeding, health care, milk/egg production, vaccination schedule, and best market selling strategies.`
+                },
+                'Small Business': {
+                    icon: '&#x1F3EA;', title: 'Business Tools',
+                    sub: 'Get advice on growing your business and managing inventory.',
+                    cardT: '&#x1F3EA; Business Advisor',
+                    label: 'What type of business/shop?',
+                    placeholder: 'e.g. Kirana store, Fruit shop, Tea stall...',
+                    prompt: (v) => `I run a ${v}. Give me practical tips for increasing sales, managing inventory, reducing waste, and any government support schemes for small businesses.`
+                },
+                'Tailoring/Handicraft': {
+                    icon: '&#x1FA61;', title: 'Craft & Tailoring Tools',
+                    sub: 'Get advice on growing orders and learning new designs.',
+                    cardT: '&#x1FA61; Tailoring Advisor',
+                    label: 'What do you make?',
+                    placeholder: 'e.g. Clothes, Embroidery, Bags...',
+                    prompt: (v) => `I do tailoring/handicraft work making ${v}. Suggest ways to get more orders, price my work better, sell online, and any government training or support schemes.`
+                },
+                'Daily Wage Labour': {
+                    icon: '&#x1F477;', title: 'Labour & Skills',
+                    sub: 'Find better work opportunities and skill upgrades.',
+                    cardT: '&#x1F477; Work Advisor',
+                    label: 'What type of work do you do?',
+                    placeholder: 'e.g. Construction, Farm labour, Cleaning...',
+                    prompt: (v) => `I do daily wage work in ${v}. How can I find better paying work, learn new skills, register for MGNREGA, and improve my income stability?`
+                },
+                'Unemployed': {
+                    icon: '&#x1F4BC;', title: 'Job Search Tools',
+                    sub: 'Find employment opportunities and free skill training.',
+                    cardT: '&#x1F4BC; Employment Advisor',
+                    label: 'What work are you looking for?',
+                    placeholder: 'e.g. Factory work, Driving, Office work...',
+                    prompt: (v) => `I am currently unemployed and looking for work in ${v}. Suggest job opportunities, free government skill training programs (PMKVY), and steps to get employed.`
+                }
+            };
+
+            const cfg = configs[occ];
+            if (!cfg) {
+                // Generic for Government Job, Private Job, Other
+                title.innerHTML = '&#x1F4BC; Your Career';
+                subtitle.textContent = 'Get career growth advice from KutumbAI.';
+                cardTitle.innerHTML = '&#x1F4BC; Career Advisor';
+                container.innerHTML = `
+                    <p style="font-size:0.88rem;color:#5A4A3A;margin-bottom:10px">You work in: <strong>${occ || 'Not specified'}</strong></p>
+                    <div class="action-cards" style="margin-top:8px">
+                        <div class="action-card" onclick="openChatWith('I work in ${occ}. How can I grow in my career, earn more, or find better opportunities?')">
+                            <div class="action-card-icon">&#x1F4C8;</div>
+                            <div class="action-card-title">Career Growth Tips</div>
+                            <div class="action-card-desc">Get personalized career advice.</div>
+                        </div>
+                        <div class="action-card" onclick="openChatWith('I work in ${occ}. What side income or part-time work can I do alongside my current job?')">
+                            <div class="action-card-icon">&#x1F4B5;</div>
+                            <div class="action-card-title">Side Income Ideas</div>
+                            <div class="action-card-desc">Earn extra alongside your job.</div>
+                        </div>
+                    </div>`;
+                return;
+            }
+
+            title.innerHTML = cfg.icon + ' ' + cfg.title;
+            subtitle.textContent = cfg.sub;
+            cardTitle.innerHTML = cfg.cardT;
+            container.innerHTML = `
+                <p style="font-size:0.85rem;color:#7A6A5A;margin-bottom:6px">${cfg.label}</p>
+                <div class="occ-input-row">
+                    <input type="text" class="occ-input" id="occInput" placeholder="${cfg.placeholder}" onkeydown="if(event.key==='Enter')getOccAdvice()">
+                    <button class="occ-btn" onclick="getOccAdvice()">Get Advice</button>
+                </div>
+                <div class="occ-result" id="occResult"></div>`;
+
+            // store prompt generator
+            window._occPromptFn = cfg.prompt;
+        }
+
+        async function getOccAdvice() {
+            const input = document.getElementById('occInput');
+            const val = input.value.trim();
+            if (!val) { alert('Please enter the details first.'); return; }
+            const result = document.getElementById('occResult');
+            result.innerHTML = '<div class="suggestion-item" style="opacity:0.6">⏳ Getting advice...</div>';
+            try {
+                const reply = await callGemini(window._occPromptFn(val) + ' Keep it practical and in plain text, no markdown formatting.');
+                const items = reply.split('\n').filter(l => l.trim().length > 0);
+                result.innerHTML = items.map(i => `<div class="suggestion-item">${i}</div>`).join('');
+            } catch (e) {
+                result.innerHTML = '<div class="suggestion-item">Could not get advice. Please try again.</div>';
+            }
+        }
+
+        function generateSuggestion() {
+            const suggestions = [];
+            const income = parseInt(familyData.income) || 0;
+            const expenditure = parseInt(familyData.expenditure) || 0;
+            const loan = parseInt(familyData.loanAmount) || 0;
+            const kids = parseInt(familyData.children) || 0;
+
+            // Expenditure vs income warning
+            if (expenditure > 0 && income > 0 && expenditure >= income) {
+                suggestions.push(`Your monthly expenses (₹${expenditure.toLocaleString('en-IN')}) equal or exceed your income (₹${income.toLocaleString('en-IN')}). Let\'s find ways to reduce costs — ask KutumbAI for help.`);
+            }
+
+            // Loan warning
+            if (loan > 0 && familyData.loanSource === 'Moneylender') {
+                suggestions.push(`You have a ₹${loan.toLocaleString('en-IN')} loan from a moneylender. Consider switching to a bank loan or SHG for lower interest rates.`);
+            } else if (loan > 0) {
+                suggestions.push(`You have an existing loan of ₹${loan.toLocaleString('en-IN')}. Track your repayments carefully and ask KutumbAI about refinancing options.`);
+            }
+
+            // Children-specific
+            if (kids > 0 && familyData.childrenAges) {
+                suggestions.push(`Your children (ages: ${familyData.childrenAges}) may be eligible for mid-day meal schemes, scholarship portals, or Atal Tinkering Labs. Ask KutumbAI!`);
+            } else if (kids > 0) {
+                suggestions.push(`With ${kids} child(ren), check scholarship schemes on the National Scholarship Portal.`);
+            }
+
+            // Income-based
+            if (income > 0 && income < 10000) {
+                suggestions.push('With your current income, you may qualify for PM-Kisan (₹6,000/year) and Ayushman Bharat (₹5 lakh health cover).');
+            }
+
+            // Occupation-based
+            if (familyData.occupation === 'Farming') {
+                suggestions.push('Check mandi rates before selling crops — prices fluctuate daily. Ask KutumbAI for current rates.');
+            }
+            if (familyData.occupation === 'Daily Wage Labour') {
+                suggestions.push('Register for MGNREGA — it guarantees 100 days of paid work per year.');
+            }
+            if (familyData.occupation === 'Unemployed') {
+                suggestions.push('Explore PMKVY (Pradhan Mantri Kaushal Vikas Yojana) for free skill training and job placement support.');
+            }
+
+            if (suggestions.length === 0) {
+                suggestions.push('Track your daily expenses this week to find areas where you can save more.');
+            }
+            document.getElementById('suggestionText').textContent = suggestions[0];
+        }
+
+        // ===== SPEND GOAL =====
+        function toggleGoalEdit() {
+            document.getElementById('goalEditArea').classList.toggle('show');
+        }
+        function updateGoal() {
+            const saved = parseInt(document.getElementById('goalSavedInput').value) || 0;
+            const target = parseInt(document.getElementById('goalTargetInput').value) || 2000;
+            goalData = { saved, target };
+            localStorage.setItem('kutumbai_goal', JSON.stringify(goalData));
+            updateGoalDisplay();
+            document.getElementById('goalEditArea').classList.remove('show');
+        }
+        function updateGoalDisplay() {
+            document.getElementById('goalSaved').textContent = '₹' + goalData.saved.toLocaleString('en-IN');
+            document.getElementById('goalTarget').textContent = '/ ₹' + goalData.target.toLocaleString('en-IN');
+            const pct = Math.min(100, Math.round((goalData.saved / goalData.target) * 100));
+            setTimeout(() => {
+                document.getElementById('goalBar').style.width = pct + '%';
+            }, 200);
+            const warning = document.getElementById('goalWarning');
+            if (pct < 25) {
+                warning.innerHTML = '<span>&#x26A0;&#xFE0F;</span><span>You\'re behind on your savings goal. Try to cut small expenses.</span>';
+            } else if (pct < 75) {
+                warning.innerHTML = '<span>&#x1F4AA;</span><span>Good progress! Keep saving to reach your target.</span>';
+            } else {
+                warning.innerHTML = '<span>&#x2705;</span><span>Excellent! You\'re almost at your savings goal!</span>';
+            }
+        }
+
+        // ===== SKILLS =====
+        function addSkill() {
+            const input = document.getElementById('skillInput');
+            const skill = input.value.trim();
+            if (!skill) return;
+            if (!skillsList.includes(skill)) {
+                skillsList.push(skill);
+                localStorage.setItem('kutumbai_skills', JSON.stringify(skillsList));
+            }
+            input.value = '';
+            renderSkills();
+        }
+        function removeSkill(idx) {
+            skillsList.splice(idx, 1);
+            localStorage.setItem('kutumbai_skills', JSON.stringify(skillsList));
+            renderSkills();
+        }
+        function renderSkills() {
+            const container = document.getElementById('skillTags');
+            container.innerHTML = skillsList.map((s, i) =>
+                `<span class="skill-tag">${s} <span class="remove" onclick="removeSkill(${i})">×</span></span>`
+            ).join('');
+        }
+        async function suggestOpportunities() {
+            if (skillsList.length === 0) {
+                alert('Please add at least one skill first.');
+                return;
+            }
+            const btn = document.getElementById('suggestBtn');
+            btn.textContent = '⏳ Thinking...';
+            btn.disabled = true;
+
+            const context = familyData
+                ? `Family: ${familyData.name}, Location: ${familyData.location || 'rural India'}, Occupation: ${familyData.occupation || 'not specified'}, Income: ₹${familyData.income || 'not specified'}/month.`
+                : '';
+
+            const prompt = `You are KutumbAI, an assistant for rural Indian families.
+${context}
+The user has these skills: ${skillsList.join(', ')}.
+
+Suggest 3-4 specific, actionable livelihood or earning opportunities based on their skills and situation. For each, give:
+- A short title
+- 1-2 lines of practical advice on how to start
+
+Keep it warm, simple, and actionable. Reply in English. Do NOT use markdown formatting like asterisks or hashes — use plain text only.`;
+
+            try {
+                const reply = await callGemini(prompt);
+                const area = document.getElementById('suggestionsArea');
+                const items = reply.split('\n').filter(l => l.trim().length > 0);
+                area.innerHTML = items.map(item =>
+                    `<div class="suggestion-item">${item}</div>`
+                ).join('');
+            } catch (e) {
+                document.getElementById('suggestionsArea').innerHTML =
+                    '<div class="suggestion-item">Could not load suggestions. Please try again.</div>';
+            }
+            btn.textContent = '✨ Get AI Suggestions';
+            btn.disabled = false;
+        }
+
+        // ===== NAV SCROLL TRACKING =====
+        function updateActiveNav() {
+            const sections = ['dashboard', 'finance', 'health', 'skills'];
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+                        const link = document.querySelector(`.nav-links a[data-section="${entry.target.id}"]`);
+                        if (link) link.classList.add('active');
+                    }
+                });
+            }, { threshold: 0.3 });
+            sections.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) observer.observe(el);
+            });
+        }
+
+        // ===== CHAT =====
+        function toggleChat() {
+            chatOpen = !chatOpen;
+            document.getElementById('chatDrawer').classList.toggle('open', chatOpen);
+            document.getElementById('chatOverlay').classList.toggle('open', chatOpen);
+            if (chatOpen) document.getElementById('chatInput').focus();
+        }
+        function openChatWith(msg) {
+            if (!chatOpen) toggleChat();
+            setTimeout(() => {
+                document.getElementById('chatInput').value = msg;
+                sendMessage();
+            }, 400);
+        }
+
+        // ===== GEMINI API =====
+        const GEMINI_API_KEY = "AIzaSyALjIbVMUmh07Of2gtPHP-7f08sHynm-Oo";
+
+        async function callGemini(prompt) {
+            const models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.0-flash-lite", "gemini-pro"];
+            let lastError = null;
+            for (const model of models) {
+                try {
+                    const res = await fetch(
+                        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`,
+                        {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                contents: [{ parts: [{ text: prompt }] }],
+                                generationConfig: { temperature: 0.7, maxOutputTokens: 1024 }
+                            })
+                        }
+                    );
+                    const data = await res.json();
+                    if (data.error) { lastError = data.error.message; continue; }
+                    return data.candidates[0].content.parts[0].text;
+                } catch (e) { lastError = e.message; continue; }
+            }
+            throw new Error(lastError || 'All models failed');
+        }
+
+        async function askKutumbAI(userMessage) {
+            let familyContext = 'No family details provided yet.';
+            if (familyData) {
+                const parts = [
+                    `Family: ${familyData.name}`,
+                    familyData.members ? `Members: ${familyData.members}` : '',
+                    familyData.location ? `Location: ${familyData.location}` : '',
+                    familyData.occupation ? `Occupation: ${familyData.occupation}` : '',
+                    familyData.income ? `Monthly Income: ₹${familyData.income}` : '',
+                    familyData.expenditure ? `Monthly Expenditure: ₹${familyData.expenditure}` : '',
+                    familyData.children ? `Children: ${familyData.children}` : '',
+                    familyData.childrenAges ? `Children's Ages: ${familyData.childrenAges}` : '',
+                    familyData.loanAmount && parseInt(familyData.loanAmount) > 0 ? `Existing Loan: ₹${familyData.loanAmount} from ${familyData.loanSource}` : 'No existing loans',
+                ];
+                familyContext = parts.filter(p => p).join(', ') + '.';
+            }
+
+            const prompt = `You are KutumbAI, a warm and trusted household assistant for rural Indian families. You speak like a caring, knowledgeable elder.
+
+Family context: ${familyContext}
+
+RULE #1 — LANGUAGE (MOST IMPORTANT):
+- Detect the language the user wrote in.
+- Reply in EXACTLY that same language. No exceptions.
+- English message → reply ONLY in English, no Hindi mixing.
+- Hindi → Hindi. Tamil → Tamil. Hinglish → Hinglish. Bengali → Bengali. Any language → same language.
+- DEFAULT: If unsure, reply in English.
+
+RULE #2 — CONTENT:
+- Keep replies 3-5 lines, warm and practical.
+- Give actionable advice on: loans, savings, government schemes (PM Kisan, Ayushman Bharat, MGNREGA), health, education, jobs.
+- Proactively warn about risks.
+- Never condescend. Do NOT use markdown formatting like ** or ## — reply in plain text only.
+
+User: ${userMessage}`;
+            return await callGemini(prompt);
+        }
+
+        // ===== CHAT UI =====
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const typingIndicator = document.getElementById('typingIndicator');
+
+        function addMessage(text, type) {
+            const msg = document.createElement('div');
+            msg.className = `chat-msg ${type}`;
+            msg.textContent = text;
+            chatMessages.insertBefore(msg, typingIndicator);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        async function sendMessage() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+            chatInput.value = '';
+            addMessage(text, 'user');
+            typingIndicator.style.display = 'block';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            try {
+                const reply = await askKutumbAI(text);
+                typingIndicator.style.display = 'none';
+                addMessage(reply, 'bot');
+            } catch (err) {
+                typingIndicator.style.display = 'none';
+                addMessage('Sorry, I could not process that. Please try again in a moment.', 'bot');
+            }
+        }
+        function sendChip(el) {
+            chatInput.value = el.textContent;
+            sendMessage();
+        }
+        // ===== SCROLL REVEAL =====
+        function initScrollReveal() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        // Also reveal children cards with stagger
+                        const cards = entry.target.querySelectorAll('.card, .action-card');
+                        cards.forEach((card, i) => {
+                            card.style.transitionDelay = (i * 0.1) + 's';
+                            card.classList.add('reveal', 'visible');
+                        });
+                    }
+                });
+            }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+            document.querySelectorAll('section:not(#onboarding)').forEach(section => {
+                section.classList.add('reveal');
+                observer.observe(section);
+            });
+            document.querySelector('.footer')?.classList.add('reveal');
+            if (document.querySelector('.footer')) observer.observe(document.querySelector('.footer'));
+        }
+
+        // Init reveal when dashboard shows
+        const origShowDashboard = showDashboard;
+        showDashboard = function () {
+            origShowDashboard();
+            setTimeout(initScrollReveal, 100);
+        };
+        // Also init on load if already logged in
+        window.addEventListener('load', () => { if (familyData) setTimeout(initScrollReveal, 300); });
+    </script>
+</body>
+
+</html>
