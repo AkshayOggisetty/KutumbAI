@@ -1928,6 +1928,68 @@
             document.getElementById('suggestionText').textContent = suggestions[0];
         }
 
+        // ===== REMINDERS =====
+        customReminders = JSON.parse(localStorage.getItem('kutumbai_reminders') || '[]');
+
+        function loadDynamicReminders() {
+            const container = document.getElementById('dynamicReminders');
+            if (!container) return; // Prevent crash if container is missing
+            let html = '';
+
+            if (familyData && familyData.loanAmount && parseInt(familyData.loanAmount) > 0) {
+                html += `<div class="suggestion-item"><span style="color:var(--terracotta)">💸 Loan Reminder:</span> Keep track of your monthly payment for the ₹${familyData.loanAmount} loan from ${familyData.loanSource}.</div>`;
+            }
+            if (familyData && familyData.childrenAges) {
+                const age = parseInt(familyData.childrenAges);
+                if (age < 5) {
+                    html += `<div class="suggestion-item"><span style="color:var(--leaf)">💉 Health:</span> Remember to check the upcoming vaccination schedule for your child.</div>`;
+                }
+            }
+            if (html === '') {
+                html = `<div class="suggestion-item" style="opacity:0.6">No immediate reminders today.</div>`;
+            }
+            container.innerHTML = html;
+        }
+
+        function renderCustomReminders() {
+            const list = document.getElementById('customRemindersList');
+            if (!list) return;
+            if (customReminders.length === 0) {
+                list.innerHTML = '';
+                return;
+            }
+            list.innerHTML = customReminders.map((r, i) =>
+                `<div class="suggestion-item" style="display:flex; justify-content:space-between;">
+                    <div>📅 ${r.text} <span style="opacity:0.6;font-size:0.8em;margin-left:8px;">${r.date}</span></div>
+                    <button onclick="deleteReminder(${i})" style="background:none;border:none;color:#999;cursor:pointer;">×</button>
+                </div>`
+            ).join('');
+        }
+
+        function addCustomReminder() {
+            const textInp = document.getElementById('reminderInput');
+            const dateInp = document.getElementById('reminderDate');
+            if (!textInp || !dateInp) return;
+
+            const text = textInp.value.trim();
+            const date = dateInp.value;
+            if (!text || !date) {
+                alert("Please enter both reminder text and date.");
+                return;
+            }
+            customReminders.push({ text, date });
+            localStorage.setItem('kutumbai_reminders', JSON.stringify(customReminders));
+            textInp.value = '';
+            dateInp.value = '';
+            renderCustomReminders();
+        }
+
+        function deleteReminder(idx) {
+            customReminders.splice(idx, 1);
+            localStorage.setItem('kutumbai_reminders', JSON.stringify(customReminders));
+            renderCustomReminders();
+        }
+
         // ===== SPEND GOAL =====
         function toggleGoalEdit() {
             document.getElementById('goalEditArea').classList.toggle('show');
@@ -2045,12 +2107,13 @@ Keep it very brief, reassuring, and use plain text (no markdown formatting like 
                 alert("Please describe your symptoms first.");
                 return;
             }
-            const symBtn = document.getElementById('symptomBtn');
+            const symBtn = document.getElementById('checkSymptomsBtn');
             const result = document.getElementById('symptomResult');
             const loc = familyData ? familyData.location : "India";
 
             symBtn.textContent = '⏳ Checking...';
             symBtn.disabled = true;
+            result.style.display = 'block';
             result.innerHTML = '<div style="opacity:0.6">Consulting KutumbAI...</div>';
 
             const prompt = `A user in ${loc} reports these symptoms: "${sym}". 
