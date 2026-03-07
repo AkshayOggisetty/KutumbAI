@@ -2018,6 +2018,56 @@ Keep it warm, simple, and actionable. Reply in English. Do NOT use markdown form
             btn.disabled = false;
         }
 
+        // ===== HEALTH LOGIC =====
+        async function loadHealthReminders() {
+            if (!familyData) return;
+            const content = document.getElementById('healthRemindersContent');
+            content.innerHTML = '<div style="opacity:0.6">⏳ Analyzing health requirements...</div>';
+
+            const prompt = `Based on a family living in ${familyData.location || "India"} with children aged ${familyData.childrenAges || "unknown"}:
+1. What critical vaccines are needed for the children right now? (Give 1-2 bullet points max).
+2. What are the 2 nearest or most recommended government/public hospitals in or around ${familyData.location || "their city"} for pediatric care?
+
+Keep it very brief, reassuring, and use plain text (no markdown formatting like asterisks or hashes).`;
+
+            try {
+                const reply = await callGemini(prompt);
+                content.innerHTML = reply.split('\n').filter(l => l.trim().length > 0).map(l => `<p style="margin-bottom:6px;">${l}</p>`).join('');
+            } catch (e) {
+                content.innerHTML = 'Could not load health data. Please try again later.';
+            }
+        }
+
+        async function checkSymptoms() {
+            const input = document.getElementById('symptomInput');
+            const sym = input.value.trim();
+            if (!sym) {
+                alert("Please describe your symptoms first.");
+                return;
+            }
+            const symBtn = document.getElementById('symptomBtn');
+            const result = document.getElementById('symptomResult');
+            const loc = familyData ? familyData.location : "India";
+
+            symBtn.textContent = '⏳ Checking...';
+            symBtn.disabled = true;
+            result.innerHTML = '<div style="opacity:0.6">Consulting KutumbAI...</div>';
+
+            const prompt = `A user in ${loc} reports these symptoms: "${sym}". 
+Give a very brief, gentle, non-diagnostic triage advice (e.g. 'This sounds like a common flu, rest and hydrate'). 
+Then suggest whether they should visit a hospital, and name 1-2 local hospitals or PHCs in ${loc}. 
+Keep it under 4 lines. Plain text only, no markdown.`;
+
+            try {
+                const reply = await callGemini(prompt);
+                result.innerHTML = reply.split('\n').filter(l => l.trim().length > 0).map(l => `<p style="margin-bottom:6px;">${l}</p>`).join('');
+            } catch (e) {
+                result.innerHTML = 'Could not process symptoms. Please try again.';
+            }
+            symBtn.textContent = '🩺 Check Symptoms';
+            symBtn.disabled = false;
+        }
+
         // ===== NAV SCROLL TRACKING =====
         function updateActiveNav() {
             const sections = ['dashboard', 'finance', 'health', 'skills'];
