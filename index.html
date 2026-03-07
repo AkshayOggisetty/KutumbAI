@@ -1425,10 +1425,41 @@
         <div class="section-title">&#x1F3E0; Dashboard</div>
         <div class="section-subtitle" id="dashGreeting">Welcome! Here's your family overview.</div>
         <div class="dash-grid">
-            <!-- Today's Suggestion -->
-            <div class="card suggestion-card">
-                <div class="card-title">&#x1F4A1; Today's Suggestion</div>
-                <p class="suggestion-body" id="suggestionText">Loading your personalized suggestion...</p>
+            <!-- Suggestions & Reminders -->
+            <div class="card suggestion-card" style="display:flex; flex-direction:column; gap:16px;">
+                <div class="card-title">&#x1F4A1; Suggestions & Reminders</div>
+
+                <!-- AI Suggestion -->
+                <div class="suggestion-section">
+                    <p class="suggestion-body" id="suggestionText">Loading your personalized suggestion...</p>
+                </div>
+
+                <!-- dynamic and custom reminders -->
+                <div class="reminders-section"
+                    style="border-top: 1px solid rgba(232, 102, 10, 0.1); padding-top: 12px;">
+                    <h4
+                        style="font-family:'Playfair Display',serif; color:var(--forest); font-size:1.1rem; margin-bottom:12px;">
+                        &#x23F0; Family Reminders</h4>
+
+                    <div id="dynamicRemindersList"
+                        style="display:flex; flex-direction:column; gap:8px; margin-bottom: 12px;">
+                        <!-- JS injected reminders -->
+                    </div>
+
+                    <div id="customRemindersList"
+                        style="display:flex; flex-direction:column; gap:8px; margin-bottom: 12px;">
+                        <!-- JS injected custom reminders -->
+                    </div>
+
+                    <div class="add-reminder-form"
+                        style="display:flex; gap:8px; align-items:center; background:rgba(250,244,232,0.5); padding:8px; border-radius:12px; border:1px solid rgba(232,102,10,0.1);">
+                        <input type="text" id="customReminderText" placeholder="Add a reminder..."
+                            style="flex:1; border:none; background:transparent; outline:none; font-family:'Sora',sans-serif; font-size:0.85rem; color:var(--forest);">
+                        <input type="date" id="customReminderDate"
+                            style="border:none; background:transparent; outline:none; font-family:'Sora',sans-serif; font-size:0.85rem; color:var(--forest); width:110px;">
+                        <button class="btn-small" onclick="addCustomReminder()" style="padding:6px 12px;">Add</button>
+                    </div>
+                </div>
             </div>
             <!-- Spend Goal -->
             <div class="card">
@@ -1512,33 +1543,38 @@
     <section id="health" class="hidden">
         <div class="section-title">&#x1F3E5; Health & Family Planning</div>
         <div class="section-subtitle">Health guidance, children planning, and education fees management.</div>
-        <div class="dash-grid">
+        <div class="dash-grid" style="margin-bottom: 24px;">
             <div class="card">
-                <div class="card-title">&#x1F514; Family Reminders</div>
-                <div class="timeline">
-                    <div class="timeline-item">
-                        <div class="timeline-dot">&#x2713;</div>
-                        <div class="timeline-avatar baby">&#x1F476;</div>
-                        <div>
-                            <div class="timeline-title">Vaccination Reminder</div>
-                            <div class="timeline-date">&#x1F4C5; Due this month</div>
-                        </div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="timeline-dot">&#x2713;</div>
-                        <div class="timeline-avatar elder">&#x1F9D3;</div>
-                        <div>
-                            <div class="timeline-title">Medicine Reminder</div>
-                            <div class="timeline-date">&#x1F4C5; Daily - 8:00 AM</div>
-                        </div>
-                    </div>
+                <div class="card-title">&#x1F489; Health Reminders</div>
+                <p style="font-size:0.82rem;color:var(--leaf);margin-bottom:14px">Based on children's age and your
+                    location.</p>
+                <div id="healthRemindersContent"
+                    style="min-height: 100px; font-size:0.85rem; color:var(--forest); white-space:pre-wrap;">
+                    <p>Loading health data...</p>
                 </div>
-                <button class="symptom-btn"
-                    onclick="openChatWith('My family member is feeling unwell. Can you help me check symptoms and suggest what to do?')">
-                    &#x1F321;&#xFE0F; Check Symptoms with AI
+                <button class="symptom-btn" style="margin-top:12px;" onclick="loadHealthReminders()">
+                    &#x21BA; Refresh Health Data
                 </button>
             </div>
+
             <div class="card">
+                <div class="card-title">&#x1FA7A; How's your health? / Are you ill?</div>
+                <p style="font-size:0.82rem;color:var(--leaf);margin-bottom:14px">Describe symptoms for AI advice and
+                    local hospital recommendations.</p>
+                <div class="form-group" style="margin-bottom:12px;">
+                    <textarea id="symptomInput" placeholder="e.g. My child has a mild fever and cough..." rows="3"
+                        style="width:100%; padding:12px; border-radius:12px; border:1px solid rgba(232,102,10,0.2); font-family:'Sora',sans-serif; font-size:0.85rem; resize:none; outline:none;"></textarea>
+                </div>
+                <button class="btn-primary" id="checkSymptomsBtn" onclick="checkSymptoms()">
+                    &#x1F321;&#xFE0F; Check Symptoms
+                </button>
+                <div id="symptomResult"
+                    style="margin-top:16px; padding:12px; background:rgba(250,244,232,0.5); border-radius:12px; border-left:4px solid var(--saffron); display:none; font-size:0.85rem; color:var(--forest); white-space:pre-wrap;">
+                </div>
+            </div>
+        </div>
+        <div class="dash-grid">
+            <div class="card" style="grid-column: 1 / -1;">
                 <div class="card-title">&#x1F476; Children & Family Planning</div>
                 <div class="action-cards" style="margin-top:8px">
                     <div class="action-card"
@@ -1660,6 +1696,7 @@
         let familyData = JSON.parse(localStorage.getItem('kutumbai_family') || 'null');
         let goalData = JSON.parse(localStorage.getItem('kutumbai_goal') || '{"saved":0,"target":2000}');
         let skillsList = JSON.parse(localStorage.getItem('kutumbai_skills') || '[]');
+        let customReminders = JSON.parse(localStorage.getItem('kutumbai_reminders') || '[]');
         let chatOpen = false;
 
         // ===== INIT =====
@@ -1722,6 +1759,13 @@
 
             // Generate suggestion based on family info
             generateSuggestion();
+
+            // Load Reminders
+            loadDynamicReminders();
+            renderCustomReminders();
+
+            // Load Health data automatically
+            loadHealthReminders();
 
             // Restore goal
             updateGoalDisplay();
@@ -1872,44 +1916,10 @@
 
         function generateSuggestion() {
             const suggestions = [];
-            const income = parseInt(familyData.income) || 0;
-            const expenditure = parseInt(familyData.expenditure) || 0;
-            const loan = parseInt(familyData.loanAmount) || 0;
-            const kids = parseInt(familyData.children) || 0;
 
-            // Expenditure vs income warning
-            if (expenditure > 0 && income > 0 && expenditure >= income) {
-                suggestions.push(`Your monthly expenses (₹${expenditure.toLocaleString('en-IN')}) equal or exceed your income (₹${income.toLocaleString('en-IN')}). Let\'s find ways to reduce costs — ask KutumbAI for help.`);
-            }
-
-            // Loan warning
-            if (loan > 0 && familyData.loanSource === 'Moneylender') {
-                suggestions.push(`You have a ₹${loan.toLocaleString('en-IN')} loan from a moneylender. Consider switching to a bank loan or SHG for lower interest rates.`);
-            } else if (loan > 0) {
-                suggestions.push(`You have an existing loan of ₹${loan.toLocaleString('en-IN')}. Track your repayments carefully and ask KutumbAI about refinancing options.`);
-            }
-
-            // Children-specific
-            if (kids > 0 && familyData.childrenAges) {
-                suggestions.push(`Your children (ages: ${familyData.childrenAges}) may be eligible for mid-day meal schemes, scholarship portals, or Atal Tinkering Labs. Ask KutumbAI!`);
-            } else if (kids > 0) {
-                suggestions.push(`With ${kids} child(ren), check scholarship schemes on the National Scholarship Portal.`);
-            }
-
-            // Income-based
-            if (income > 0 && income < 10000) {
-                suggestions.push('With your current income, you may qualify for PM-Kisan (₹6,000/year) and Ayushman Bharat (₹5 lakh health cover).');
-            }
-
-            // Occupation-based
-            if (familyData.occupation === 'Farming') {
-                suggestions.push('Check mandi rates before selling crops — prices fluctuate daily. Ask KutumbAI for current rates.');
-            }
-            if (familyData.occupation === 'Daily Wage Labour') {
-                suggestions.push('Register for MGNREGA — it guarantees 100 days of paid work per year.');
-            }
-            if (familyData.occupation === 'Unemployed') {
-                suggestions.push('Explore PMKVY (Pradhan Mantri Kaushal Vikas Yojana) for free skill training and job placement support.');
+            const inputTxt = document.getElementById('occInput');
+            if (inputTxt) {
+                // Ignore, handled by occ section
             }
 
             if (suggestions.length === 0) {
@@ -2041,25 +2051,20 @@ Keep it warm, simple, and actionable. Reply in English. Do NOT use markdown form
             }, 400);
         }
 
-        // ===== Google Gemini API =====
-        const GEMINI_API_KEY = "AIzaSyBqHLHdq2VrfbgfTDBa34m968cQIjtsvs4";
+        // ===== Vercel Proxy API =====
+        // The API key is now securely stored in Vercel Environment Variables.
+        // We call our serverless function instead of Google directly.
 
         async function callGemini(prompt) {
-            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${GEMINI_API_KEY}`, {
+            const res = await fetch('/api/gemini', {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: prompt }] }],
-                    generationConfig: {
-                        temperature: 0.7,
-                        maxOutputTokens: 1024
-                    }
-                })
+                body: JSON.stringify({ prompt: prompt })
             });
             const data = await res.json();
-            if (data.error) throw new Error(data.error.message);
+            if (data.error) throw new Error(data.error);
             return data.candidates[0].content.parts[0].text;
         }
 
