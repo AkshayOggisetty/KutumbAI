@@ -1914,18 +1914,25 @@
             }
         }
 
-        function generateSuggestion() {
-            const suggestions = [];
+        async function generateSuggestion() {
+            const suggestionText = document.getElementById('suggestionText');
+            if (!suggestionText) return;
 
-            const inputTxt = document.getElementById('occInput');
-            if (inputTxt) {
-                // Ignore, handled by occ section
+            if (familyData) {
+                suggestionText.innerHTML = '<span style="opacity:0.6">⏳ Analyzing your profile for a suggestion...</span>';
+                const prompt = `Based on a rural Indian family with Occupation: ${familyData.occupation || 'unknown'}, Monthly Income: ₹${familyData.income || 'unknown'}, and ${familyData.children || '0'} children. 
+Give ONE single, highly actionable piece of advice (max 2 sentences) about how they can improve their finances, health, or career. 
+Keep it warm, simple, and use plain text with NO markdown.`;
+                try {
+                    const reply = await callGemini(prompt);
+                    // Remove any accidental bold markdown the AI might return
+                    suggestionText.textContent = reply.replace(/\*/g, '').trim();
+                } catch (e) {
+                    suggestionText.textContent = 'Track your daily expenses this week to find areas where you can save more.';
+                }
+            } else {
+                suggestionText.textContent = 'Track your daily expenses this week to find areas where you can save more.';
             }
-
-            if (suggestions.length === 0) {
-                suggestions.push('Track your daily expenses this week to find areas where you can save more.');
-            }
-            document.getElementById('suggestionText').textContent = suggestions[0];
         }
 
         // ===== REMINDERS =====
